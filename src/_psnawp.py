@@ -269,6 +269,18 @@ class PSNUserProfile(BaseModel):
             print(f"Error fetching trophies: {str(e)}")
             return []
     
+    def get_title_stats(self, limit=None):
+        """Get detailed information about games the user has played
+        
+        Returns information about play time, play count, and other stats
+        for each game title the user has played.
+        """
+        try:
+            return self.user.title_stats(limit=limit)
+        except Exception as e:
+            print(f"Error fetching title stats: {str(e)}")
+            return []
+    
     # Construct full profile object
     def get_full_profile(self) -> Dict[str, Any]:
         """Get a complete profile with all available information"""

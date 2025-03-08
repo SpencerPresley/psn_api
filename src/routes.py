@@ -273,3 +273,49 @@ async def get_trophy_titles(
         }
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"Could not retrieve trophy titles: {str(e)}")
+
+@router.get("/users/{online_id}/games")
+async def get_played_games(
+    online_id: str,
+    limit: Optional[int] = Query(None, description="Max number of games to retrieve")
+):
+    """
+    Get a list of games the user has played with detailed statistics
+    
+    This endpoint returns game-related statistics including:
+    - Title name and ID
+    - Platform category
+    - Image URL
+    - Play count
+    - First played date
+    - Last played date
+    - Play duration
+    """
+    try:
+        user = get_psn_user(online_id)
+        title_iterator = user.get_title_stats(limit=limit)
+        
+        # Return game data in a list format
+        game_list = []
+        for title in title_iterator:
+            try:
+                game_list.append({
+                    "name": title.name,
+                    "title_id": title.title_id,
+                    "platform": title.category,
+                    "image_url": title.image_url,
+                    "play_count": title.play_count,
+                    "first_played": title.first_played_date_time,
+                    "last_played": title.last_played_date_time,
+                    "play_duration": str(title.play_duration)
+                })
+            except Exception as e:
+                print(f"Error processing game: {e}")
+        
+        return {
+            "online_id": online_id,
+            "total_games": len(game_list),
+            "games": game_list
+        }
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"Could not retrieve game stats: {str(e)}")
